@@ -46,7 +46,7 @@ multiPackage:
         buildTools: [target-toolchain]
         buildVars: [CROSS_COMPILE, LINUX_CONFIG]
         buildScript: |
-            makeParallel bzImage modules dtbs
+            HOSTCFLAGS="-I/openssl/include" HOSTLDFLAGS="-L/openssl/lib" HOSTLDLIBS="-ldl -pthread" makeParallel bzImage modules dtbs
 
         multiPackage:
             image:

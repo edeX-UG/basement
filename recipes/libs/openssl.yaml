@@ -17,16 +17,17 @@ checkoutSCM:
     extract: False
 
 buildTools: [target-toolchain]
-buildVars: [PKG_VERSION, CC, AR, RANLIB, ARCH, AUTOCONF_HOST]
+buildVars: [PKG_VERSION, CC, AR, RANLIB, ARCH, AUTOCONF_HOST, OPENSSL_PREFIX]
 buildScript: |
     export TARGETMACH=${AUTOCONF_HOST}
     export LDFLAGS="-Wl,-rpath-link=${BOB_DEP_PATHS[libs::zlib-dev]}/usr/lib"
+    BUILD_PREFIX=${OPENSSL_PREFIX:-/usr}
 
     mkdir -p install
     tar -xzf $1/openssl-${PKG_VERSION}.tar.gz
     pushd openssl-${PKG_VERSION}
     ./Configure \
-        --prefix=/usr \
+        --prefix=${BUILD_PREFIX} \
         --openssldir=/etc/ssl \
         --libdir=lib \
         shared \
@@ -42,8 +43,20 @@ buildScript: |
 
 multiPackage:
     dev:
-        packageScript: installPackageDev "$1/install/"
+        packageVars: [OPENSSL_PREFIX]
+        packageScript: |
+            if [[ "none" = ${OPENSSL_PREFIX:-none} ]] ; then
+                installPackageDev "$1/install/"
+            else
+                installPackageDev "$1/install/" "${OPENSSL_PREFIX}/***"
+            fi
         provideDeps: [ "*-dev" ]
     tgt:
-        packageScript: installPackageTgt "$1/install/"
+        packageVars: [OPENSSL_PREFIX]
+        packageScript: |
+            if [[ "none" = ${OPENSSL_PREFIX:-none} ]] ; then
+                installPackageTgt "$1/install/"
+            else
+                installPackageTgt "$1/install/" "${OPENSSL_PREFIX}/***"
+            fi
         provideDeps: [ "*-tgt" ]

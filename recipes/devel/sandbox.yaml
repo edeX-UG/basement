@@ -79,6 +79,10 @@ depends:
     - utils::unzip
     - utils::which
     - utils::xz-utils
+    -
+        name: libs::openssl-dev
+        environment:
+            OPENSSL_PREFIX: "/openssl"
 
     # native toolchain installed in /toolchain
     - environment:
