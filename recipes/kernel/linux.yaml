@@ -44,18 +44,28 @@ buildScript: |
 multiPackage:
     "":
         buildTools: [target-toolchain]
-        buildVars: [CROSS_COMPILE, LINUX_CONFIG]
+        buildVars: [ARCH, CROSS_COMPILE, LINUX_CONFIG]
         buildScript: |
-            HOSTCFLAGS="-I/openssl/include" HOSTLDFLAGS="-L/openssl/lib" HOSTLDLIBS="-ldl -pthread" makeParallel bzImage modules dtbs
+            if [[ $ARCH = arm64 ]] ; then
+                HOSTCFLAGS="-I/openssl/include" HOSTLDFLAGS="-L/openssl/lib" HOSTLDLIBS="-ldl -pthread" makeParallel V=1 Image modules dtbs
+            else
+                HOSTCFLAGS="-I/openssl/include" HOSTLDFLAGS="-L/openssl/lib" HOSTLDLIBS="-ldl -pthread" makeParallel V=1 bzImage modules dtbs
+            fi
 
         multiPackage:
             image:
+                packageVars: [ARCH]
                 packageScript: |
                     read LINUX_ARCH_PATH < $1/.arch-path
                     mkdir -p boot/overlays
-                    cp -a $1/$LINUX_ARCH_PATH/boot/zImage boot/
-                    cp -a $1/$LINUX_ARCH_PATH/boot/dts/*.dtb boot/
-                    #cp -a $1/$LINUX_ARCH_PATH/boot/dts/overlays/*.dtb* boot/overlays/
+                    if [[ $ARCH = arm64 ]] ; then
+                        cp -a $1/$LINUX_ARCH_PATH/boot/Image boot/
+                        cp -a $1/$LINUX_ARCH_PATH/boot/dts/* boot/
+                    else
+                        cp -a $1/$LINUX_ARCH_PATH/boot/zImage boot/
+                        cp -a $1/$LINUX_ARCH_PATH/boot/dts/*.dtb boot/
+                        cp -a $1/$LINUX_ARCH_PATH/boot/dts/overlays/*.dtb* boot/overlays/
+                    fi
 
             modules:
                 packageScript: |
