@@ -1,12 +1,12 @@
 inherit: [make]
 
 metaEnvironment:
-    PKG_VERSION: "5.3.9"
+    PKG_VERSION: "5.4.23"
 
 checkoutSCM:
     scm: url
     url: https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${PKG_VERSION}.tar.xz
-    digestSHA1: "4e733c7be714d7c17a11e1cdcc831dd2a072018c"
+    digestSHA256: "3f28aacdf5deddfdf80bb949884699b96053a3548dc3434552d30dc0bc781eca"
     stripComponents: 1
 
 buildTools: [bison, flex, host-toolchain]
