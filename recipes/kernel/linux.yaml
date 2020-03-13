@@ -48,20 +48,31 @@ multiPackage:
               tools:
                 target-toolchain: host-toolchain
         buildTools: [target-toolchain]
-        buildVars: [CROSS_COMPILE, LINUX_CONFIG]
+        buildVars: [ARCH, CROSS_COMPILE, LINUX_CONFIG]
         buildScript: |
             export HOSTCFLAGS="-I${BOB_DEP_PATHS[libs::openssl-dev]}/usr/include"
             export HOSTLDFLAGS="-L${BOB_DEP_PATHS[libs::openssl-dev]}/usr/lib"
-            makeParallel bzImage modules dtbs
+
+            if [[ $ARCH = arm64 ]] ; then
+                makeParallel Image modules dtbs
+            else
+                makeParallel bzImage modules dtbs
+            fi
 
         multiPackage:
             image:
+                packageVars: [ARCH]
                 packageScript: |
                     read LINUX_ARCH_PATH < $1/.arch-path
                     mkdir -p boot/overlays
-                    cp -a $1/$LINUX_ARCH_PATH/boot/zImage boot/
-                    cp -a $1/$LINUX_ARCH_PATH/boot/dts/*.dtb boot/
-                    #cp -a $1/$LINUX_ARCH_PATH/boot/dts/overlays/*.dtb* boot/overlays/
+                    if [[ $ARCH = arm64 ]] ; then
+                        cp -a $1/$LINUX_ARCH_PATH/boot/Image boot/
+                        cp -a $1/$LINUX_ARCH_PATH/boot/dts/* boot/
+                    else
+                        cp -a $1/$LINUX_ARCH_PATH/boot/zImage boot/
+                        cp -a $1/$LINUX_ARCH_PATH/boot/dts/*.dtb boot/
+                        cp -a $1/$LINUX_ARCH_PATH/boot/dts/overlays/*.dtb* boot/overlays/
+                    fi
 
             modules:
                 packageScript: |
