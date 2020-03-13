@@ -82,3 +82,11 @@ multiPackage:
             GCC_ENABLE_LANGUAGES: "c"
             GCC_LIBC: "newlib"
 
+    # ARMv7 Linux CortexA toolchain with hard floating point
+    aarch64-linux-gnueabihf:
+        environment:
+            AUTOCONF_TARGET: "aarch64-linux-gnu"
+            ARCH: "arm64"
+            GCC_TARGET_ARCH: "armv8-a"
+            GCC_LIBC: "glibc"
+
